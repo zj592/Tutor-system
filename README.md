@@ -147,9 +147,18 @@ mysql -uroot -p < db/init.sql
 spring:
   datasource:
     url: jdbc:mysql://localhost:3306/tutor_system?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
-    username: root          # 也可以用环境变量 DB_USERNAME 覆盖
-    password: 1234          # 也可以用环境变量 DB_PASSWORD 覆盖
+    username: ${DB_USERNAME:root}            # 默认 root，可用环境变量覆盖
+    password: ${DB_PASSWORD:tutor_dev_2026}  # 开发占位默认值，请用环境变量覆盖
 ```
+
+> 本地开发：仓库默认占位密码为 `tutor_dev_2026`，并非你的真实库密码。
+> 若本地 MySQL 密码不同，启动前在终端设置环境变量即可，例如本机为 `1234`：
+> ```bash
+> # Git Bash / Linux / macOS
+> export DB_PASSWORD=1234
+> # 或 Windows PowerShell
+> $env:DB_PASSWORD="1234"
+> ```
 
 **3. 构建并启动**
 
