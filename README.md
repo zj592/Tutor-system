@@ -299,7 +299,3 @@ BASE_URL=http://localhost:8081 python tests/e2e_test.py
 - 未接入实时沟通、评价、邮件通知
 - `PasswordUtilsTest` 是 `@SpringBootTest`，运行 `mvn test` 需要数据库可用；只想验证编译可加 `-DskipTests`
 - 分页查询在列表页逐条查发布者信息，数据量大时应改成连表查询
-
-## 许可证
-
-MIT，见 [LICENSE](LICENSE)。
