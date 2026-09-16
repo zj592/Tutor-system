@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>教员简历列表</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* 全局容器（强制覆盖原有样式） */
+        .container {
+            width: 90% !important;
+            margin: 20px auto !important;
+            max-width: none !important;
+        }
+
+        h3 {
+            text-align: center !important;
+            color: #333 !important;
+            margin: 20px 0 !important;
+            font-size: 18px !important;
+            font-weight: normal !important;
+        }
+
+        /* 原card类强制覆盖（不修改类名） */
+        .card {
+            border: 1px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            padding: 18px !important;
+            margin: 10px !important;
+            box-shadow: 0 2px 5px #f0f0f0 !important;
+            transition: all 0.3s !important;
+            border: none !important; /* 去掉bootstrap默认边框 */
+            width: 100% !important;
+        }
+
+        .card:hover {
+            box-shadow: 0 5px 10px #e0e0e0 !important;
+            transform: translateY(-2px) !important;
+        }
+
+        .card-title {
+            color: #007bff !important;
+            margin: 0 0 10px 0 !important;
+            font-size: 16px !important;
+            font-weight: normal !important;
+        }
+
+        .card-text {
+            margin: 6px 0 !important;
+            color: #333 !important;
+            font-size: 14px !important;
+        }
+
+        /* 科目标签 */
+        .card-text span:not(:first-child) {
+            background: #f8f9fa !important;
+            color: #007bff !important;
+            padding: 3px 8px !important;
+            border-radius: 4px !important;
+            margin-right: 6px !important;
+            font-size: 13px !important;
+            display: inline-block !important;
+        }
+
+        /* 按钮强制覆盖 */
+        .btn-primary {
+            padding: 8px 20px !important;
+            background: #007bff !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+            font-size: 14px !important;
+            margin-top: 10px !important;
+            display: inline-block !important;
+        }
+
+        .btn-primary:hover {
+            background: #0069d9 !important;
+            color: white !important;
+        }
+
+        /* 分页强制覆盖 */
+        .pagination {
+            text-align: center !important;
+            margin: 30px 0 !important;
+            justify-content: center !important;
+        }
+
+        .pagination .page-link {
+            padding: 8px 15px !important;
+            margin: 0 5px !important;
+            border: 1px solid #ddd !important;
+            border-radius: 4px !important;
+            color: #007bff !important;
+            text-decoration: none !important;
+            background: white !important;
+        }
+
+        .pagination .page-link:hover {
+            background: #007bff !important;
+            color: white !important;
+            border-color: #007bff !important;
+        }
+
+        .pagination .active .page-link {
+            background: #007bff !important;
+            color: white !important;
+            border-color: #007bff !important;
+        }
+
+        .pagination .disabled .page-link {
+            color: #666 !important;
+            cursor: not-allowed !important;
+            background: #f8f9fa !important;
+        }
+
+        /* 布局调整（原row/col-md-4） */
+        .row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            justify-content: center !important;
+            margin: 0 !important;
+        }
+
+        .col-md-4 {
+            width: 30% !important;
+            min-width: 280px !important;
+            padding: 0 !important;
+            margin: 0 !important;
+        }
+
+        /* 空数据提示 */
+        .empty-tip {
+            text-align: center !important;
+            padding: 50px !important;
+            color: #666 !important;
+            font-size: 16px !important;
+        }
+    </style>
+</head>
+<body>
+<div class="container mt-5">
+    <h3>教员简历列表</h3>
+
+    <!-- 简历列表 -->
+    <div class="row">
+        <div th:each="resume : ${resumePage.records}" class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${resume.publisher.username}">教员姓名</h5>
+                    <p class="card-text">
+                        <span>可教科目：</span>
+                        <span th:each="subject : ${resume.subjectArray}" th:text="${subject}"></span>
+                    </p>
+                    <p class="card-text" th:text="'期望薪资：' + ${resume.expectedSalary}"></p>
+                    <a th:href="@{/resume/detail/{id}(id=${resume.resumeId})}" class="btn btn-primary">查看详情</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分页控件 -->
+    <nav th:if="${resumePage.pages > 1}">
+        <ul class="pagination justify-content-center">
+            <li class="page-item" th:classappend="${resumePage.current == 1 ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/resume/list(page=${resumePage.current - 1})}">上一页</a>
+            </li>
+            <li class="page-item" th:classappend="${i == resumePage.current ? 'active' : ''}"
+                th:each="i : ${#numbers.sequence(1, resumePage.pages)}">
+                <a class="page-link" th:href="@{/resume/list(page=${i})}" th:text="${i}"></a>
+            </li>
+            <li class="page-item" th:classappend="${resumePage.current == resumePage.pages ? 'disabled' : ''}">
+                <a class="page-link" th:href="@{/resume/list(page=${resumePage.current + 1})}">下一页</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+</html>

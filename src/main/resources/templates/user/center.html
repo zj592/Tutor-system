@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - 家教直通车</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">家教直通车</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/demands">家教需求</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/resumes">教员简历</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown">
+                        <span sec:authentication="name"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/user/center">个人中心</a></li>
+                        <li><a class="dropdown-item" href="/user/edit">编辑资料</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 主要内容 -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- 左侧信息栏 -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title" th:text="${user.username}"></h5>
+                    <p class="text-muted" th:text="${user.getRoleName()}"></p>
+                    <p class="text-muted">注册时间：<br><span th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd')}"></span></p>
+                    <a href="/user/edit" class="btn btn-sm btn-outline-primary">编辑资料</a>
+                </div>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6 class="card-title">快捷操作</h6>
+                    <div class="d-grid gap-2">
+                        <a sec:authorize="hasRole('PARENT')" href="/demand/publish" class="btn btn-success btn-sm">发布家教需求</a>
+                        <a sec:authorize="hasRole('TUTOR')" href="/resume/publish" class="btn btn-info btn-sm">发布家教简历</a>
+                        <a href="/demands" class="btn btn-outline-primary btn-sm">浏览家教需求</a>
+                        <a href="/resumes" class="btn btn-outline-info btn-sm">浏览教员简历</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧内容区 -->
+        <div class="col-md-9">
+            <!-- 提示信息 -->
+            <div th:if="${successMsg}" class="alert alert-success">
+                <span th:text="${successMsg}"></span>
+            </div>
+            <div th:if="${errorMsg}" class="alert alert-danger">
+                <span th:text="${errorMsg}"></span>
+            </div>
+
+            <!-- 家长发布的需求 -->
+            <div sec:authorize="hasRole('PARENT')" class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">我的家教需求</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(myDemands)}" class="text-center text-muted py-3">
+                        您还没有发布家教需求
+                    </div>
+                    <div th:each="demand : ${myDemands}" class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title">
+                                        <span class="badge bg-primary" th:text="${demand.subject}"></span>
+                                        <span th:text="${demand.grade}"></span>
+                                    </h6>
+                                    <p class="card-text" th:text="${#strings.abbreviate(demand.description, 80)}"></p>
+                                    <p class="text-muted">薪资：<span th:text="${demand.salary} + '元/小时'"></span></p>
+                                </div>
+                                <div class="text-end">
+                                        <span class="badge"
+                                              th:classappend="${demand.status == 0} ? 'bg-warning' : (${demand.status == 1} ? 'bg-success' : 'bg-secondary')"
+                                              th:text="${demand.getStatusName()}"></span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <a th:href="@{/demand/detail/{id}(id=${demand.demandId})}" class="btn btn-sm btn-outline-primary">查看</a>
+                                <!-- 仅待审核状态可编辑 -->
+                                <a th:if="${demand.status == 0}" th:href="@{/demand/edit/{id}(id=${demand.demandId})}" class="btn btn-sm btn-outline-warning">编辑</a>
+                                <a th:if="${demand.status == 1}" href="#" class="btn btn-sm btn-outline-secondary" onclick="alert('已发布的信息不能编辑')">编辑</a>
+                                <form th:action="@{/demand/close/{id}(id=${demand.demandId})}" method="post" style="display: inline;" onsubmit="return confirm('确定要关闭这个需求吗？')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">关闭</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 教员发布的简历 -->
+            <div sec:authorize="hasRole('TUTOR')" class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">我的家教简历</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(myResumes)}" class="text-center text-muted py-3">
+                        您还没有发布家教简历
+                    </div>
+                    <div th:each="resume : ${myResumes}" class="card mb-3">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title">
+                                        <span class="badge bg-info" th:each="subject : ${resume.getSubjectArray()}" th:text="${subject}" style="margin-right: 5px;"></span>
+                                    </h6>
+                                    <p class="card-text" th:text="${#strings.abbreviate(resume.experience, 80)}"></p>
+                                    <p class="text-muted">期望薪资：<span th:text="${resume.expectedSalary} + '元/小时'"></span></p>
+                                </div>
+                                <div class="text-end">
+                                        <span class="badge"
+                                              th:classappend="${resume.status == 0} ? 'bg-warning' : (${resume.status == 1} ? 'bg-success' : 'bg-secondary')"
+                                              th:text="${resume.getStatusName()}"></span>
+                                </div>
+                            </div>
+                            <div class="mt-2">
+                                <a th:href="@{/resume/detail/{id}(id=${resume.resumeId})}" class="btn btn-sm btn-outline-info">查看</a>
+                                <!-- 仅待审核状态可编辑 -->
+                                <a th:if="${resume.status == 0}" th:href="@{/resume/edit/{id}(id=${resume.resumeId})}" class="btn btn-sm btn-outline-warning">编辑</a>
+                                <a th:if="${resume.status == 1}" href="#" class="btn btn-sm btn-outline-secondary" onclick="alert('已发布的信息不能编辑')">编辑</a>
+                                <form th:action="@{/resume/close/{id}(id=${resume.resumeId})}" method="post" style="display: inline;" onsubmit="return confirm('确定要关闭这个简历吗？')">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">关闭</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 家教直通车系统. 版权所有.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

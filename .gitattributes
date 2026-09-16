@@ -1,0 +1,13 @@
+# 统一使用 LF 行尾。
+# Windows 上 git 默认 core.autocrlf=true，checkout 时会把文件转成 CRLF，
+# 而带 CRLF 的 Dockerfile / shell 脚本在 Linux 容器里会直接构建失败（/bin/sh^M: not found）。
+* text=auto eol=lf
+
+# 二进制文件不做行尾转换
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.zip binary

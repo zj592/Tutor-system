@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>家教需求列表 - 家教直通车</title>
+  <link rel="stylesheet" th:href="@{/style.css}">
+  <style>
+    /* 本页样式 */
+    .container {width: 90%; margin: 20px auto;}
+    .search-box {text-align: center; margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;}
+    .search-box input {padding: 8px 15px; width: 350px; border: 1px solid #ddd; border-radius: 4px;}
+    .search-box button {padding: 8px 20px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 8px;}
+    .demand-card {border: 1px solid #e0e0e0; border-radius: 8px; padding: 18px; margin: 10px; box-shadow: 0 2px 5px #f0f0f0; transition: all 0.3s;}
+    .demand-card:hover {box-shadow: 0 5px 10px #e0e0e0; transform: translateY(-2px);}
+    .demand-card h4 {color: #007bff; margin: 0 0 10px 0;}
+    .demand-card p {margin: 6px 0; color: #333; font-size: 14px;}
+    .demand-card .info {color: #666; font-size: 13px;}
+    .card-row {display: flex; flex-wrap: wrap; justify-content: center;}
+    .card-item {width: 30%; min-width: 280px;}
+    .pagination {text-align: center; margin: 30px 0;}
+    .pagination a {padding: 8px 15px; margin: 0 5px; border: 1px solid #ddd; border-radius: 4px; color: #007bff; text-decoration: none;}
+    .pagination a:hover {background: #007bff; color: white;}
+    .pagination .active {background: #007bff; color: white; border-color: #007bff;}
+    .empty-tip {text-align: center; padding: 50px; color: #666; font-size: 16px;}
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2 style="text-align: center; color: #333; margin: 20px 0;">家教需求列表</h2>
+
+  <!-- 关键词搜索 -->
+  <div class="search-box">
+    <form th:action="@{/demand/list}" method="get">
+      <input type="text" name="keyword" placeholder="输入科目、年级、需求描述搜索..." th:value="${keyword}">
+      <button type="submit">搜索</button>
+    </form>
+  </div>
+
+  <!-- 家教需求列表卡片展示 -->
+  <div class="card-row">
+    <div th:each="demand : ${demandPage.records}" class="card-item demand-card">
+      <h4 th:text="${demand.subject} + ' | ' + ${demand.grade}">数学 | 初中三年级</h4>
+      <p><strong>薪资：</strong> <span th:text="${demand.salary} + ' 元/小时'">200 元/小时</span></p>
+      <p><strong>联系方式：</strong> <span th:text="${demand.contact}">13800138001</span></p>
+      <p><strong>发布人：</strong> <span th:text="${demand.publisher != null ? demand.publisher.username : '匿名'}">张三</span></p>
+      <p class="info"><strong>发布时间：</strong> <span th:text="${demand.formatPublishTime}">2025-12-29 18:00</span></p>
+      <p class="info"><strong>状态：</strong> <span th:text="${demand.statusName}">已发布</span></p>
+      <p style="margin-top:10px;">
+        <a th:href="@{/demand/detail/{id}(id=${demand.demandId})}" style="color:#007bff;">查看详情 ></a>
+      </p>
+    </div>
+
+    <!-- 无数据时的友好提示 -->
+    <div th:if="${demandPage == null or demandPage.records.size() == 0}" class="empty-tip">
+      暂无相关家教需求，换个关键词试试吧~
+    </div>
+  </div>
+
+  <!-- 分页组件：完整可用，页码跳转、上一页下一页都有 -->
+  <div class="pagination" th:if="${demandPage != null and demandPage.pages > 1}">
+    <a th:href="@{/demand/list(page=1,size=${demandPage.size},keyword=${keyword})}">首页</a>
+    <a th:href="@{/demand/list(page=${demandPage.current-1},size=${demandPage.size},keyword=${keyword})}"
+       th:if="${demandPage.current > 1}">上一页</a>
+
+    <a th:each="num : ${#numbers.sequence(1, demandPage.pages)}"
+       th:href="@{/demand/list(page=${num},size=${demandPage.size},keyword=${keyword})}"
+       th:class="${num == demandPage.current ? 'active' : ''}"
+       th:text="${num}">1</a>
+
+    <a th:href="@{/demand/list(page=${demandPage.current+1},size=${demandPage.size},keyword=${keyword})}"
+       th:if="${demandPage.current < demandPage.pages}">下一页</a>
+    <a th:href="@{/demand/list(page=${demandPage.pages},size=${demandPage.size},keyword=${keyword})}">尾页</a>
+  </div>
+</div>
+</body>
+</html>

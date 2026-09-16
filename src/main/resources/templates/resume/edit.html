@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑家教简历 - 家教直通车</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">家教直通车</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">首页</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/demands">家教需求</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/resumes">教员简历</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <span sec:authentication="name"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/user/center">个人中心</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">编辑家教简历</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            修改后需要管理员重新审核，审核通过前不会在列表中展示。
+                        </div>
+
+                        <div th:if="${errorMsg}" class="alert alert-danger">
+                            <span th:text="${errorMsg}"></span>
+                        </div>
+
+                        <form th:action="@{/resume/update}" method="post">
+                            <input type="hidden" name="resumeId" th:value="${resume.resumeId}"/>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="subjects" class="form-label">可教科目 *</label>
+                                        <input type="text" class="form-control" id="subjects" name="subjects"
+                                               placeholder="多个科目用逗号分隔，例如：数学,物理"
+                                               required th:value="${resume.subjects}">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="expectedSalary" class="form-label">期望薪资（元/小时）</label>
+                                        <input type="number" class="form-control" id="expectedSalary"
+                                               name="expectedSalary" step="0.01" min="0"
+                                               th:value="${resume.expectedSalary}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="experience" class="form-label">教学经验 *</label>
+                                <textarea class="form-control" id="experience" name="experience" rows="4"
+                                          placeholder="请描述您的教学经验，包括教龄、所教学段、教学成果等"
+                                          required th:text="${resume.experience}"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="availableTime" class="form-label">可授课时间 *</label>
+                                <textarea class="form-control" id="availableTime" name="availableTime" rows="2"
+                                          placeholder="例如：周末上午、工作日晚上等"
+                                          required th:text="${resume.availableTime}"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="introduction" class="form-label">个人简介</label>
+                                <textarea class="form-control" id="introduction" name="introduction" rows="4"
+                                          placeholder="请简单介绍您的教育背景、教学特点、获奖情况等"
+                                          th:text="${resume.introduction}"></textarea>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="certificates" class="form-label">资格证书</label>
+                                <input type="text" class="form-control" id="certificates" name="certificates"
+                                       placeholder="如有教师资格证等，请输入证书名称"
+                                       th:value="${resume.certificates}">
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">保存并重新提交审核</button>
+                                <a href="/user/center" class="btn btn-outline-secondary">返回个人中心</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 家教直通车系统. 版权所有.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

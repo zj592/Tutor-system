@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>编辑个人资料 - 家教直通车</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- 导航栏 和center.html一样，直接复制 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">家教直通车</a>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item"><a class="nav-link" href="/">首页</a></li>
+                <li class="nav-item"><a class="nav-link" href="/demands">家教需求</a></li>
+                <li class="nav-item"><a class="nav-link" href="/resumes">教员简历</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle active" href="#" data-bs-toggle="dropdown">
+                        <span th:text="${user.username}"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/user/center">个人中心</a></li>
+                        <li><a class="dropdown-item active" href="/user/edit">编辑资料</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 编辑资料表单核心区 -->
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0">编辑个人资料</h5>
+                </div>
+                <div class="card-body">
+                    <!-- 提交修改的表单，POST请求提交到/user/update -->
+                    <form th:action="@{/user/update}" method="post">
+                        <!-- 隐藏域：传递用户ID，必须有 -->
+                        <input type="hidden" name="id" th:value="${user.userId}">
+
+                        <div class="mb-3">
+                            <label class="form-label">用户名</label>
+                            <input type="text" class="form-control" name="username" th:value="${user.username}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">手机号</label>
+                            <input type="tel" class="form-control" name="phone" th:value="${user.phone}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">邮箱</label>
+                            <input type="email" class="form-control" name="email" th:value="${user.email}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">身份</label>
+                            <input type="text" class="form-control" th:value="${user.getRoleName()}" readonly>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">注册时间</label>
+                            <input type="text" class="form-control" th:text="${#temporals.format(user.createTime, 'yyyy-MM-dd HH:mm')}" readonly>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="/user/center" class="btn btn-outline-secondary">返回个人中心</a>
+                            <button type="submit" class="btn btn-primary">保存修改</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="bg-light text-center py-4 mt-5">
+    <p class="mb-0">&copy; 2025 家教直通车系统. 版权所有.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

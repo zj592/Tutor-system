@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>管理后台 - 仪表盘</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <style>
+        /* 全局基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px #f0f0f0;
+            margin: 1rem 0 2rem 0 !important;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        nav .navbar-brand {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        nav a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        nav a:last-child {
+            color: #dc3545;
+        }
+
+        nav a:last-child:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* 卡片样式 */
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 5px #f0f0f0;
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .card p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <!-- 导航栏 -->
+    <nav style="margin: 1rem 0;">
+        <a href="/" class="navbar-brand">家教直通车</a> |
+        <a th:href="@{/admin/dashboard}">首页</a> |
+        <a th:href="@{/admin/users}">用户管理</a> |
+        <a th:href="@{/admin/demands/review}">需求审核</a> |
+        <a th:href="@{/admin/resumes/review}">简历审核</a> |
+        <a th:href="@{/logout}">退出</a>
+    </nav>
+
+    <main>
+        <div class="card">
+            <h2>系统概览</h2>
+            <p>欢迎，管理员！</p>
+            <!-- 未来可扩展统计信息 -->
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 家教直通车系统. 版权所有.</p>
+    </footer>
+</div>
+</body>
+</html>

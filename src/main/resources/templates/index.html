@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>家教直通车系统</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<!-- 导航栏 -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">家教直通车</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="/">首页</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/demands">家教需求</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/resumes">教员简历</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav" sec:authorize="isAnonymous()">
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">登录</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/register">注册</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav" sec:authorize="isAuthenticated()">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        <span sec:authentication="name"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/user/center">个人中心</a></li>
+                        <li><a class="dropdown-item" href="/admin/dashboard">进入管理后台</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/logout">退出登录</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- 主要内容 -->
+<div class="container mt-4">
+    <!-- 搜索区域：同一个关键词可分别搜需求或简历 -->
+    <div style="text-align: center; margin: 20px 0; display: flex; justify-content: center; align-items: center; gap: 8px;">
+        <input type="text" id="searchKeyword" name="keyword" placeholder="输入需求/简历关键词搜索..."
+               style="padding: 8px 15px; width: 380px; border: 1px solid #ddd; border-radius: 4px;">
+
+        <!-- 按钮1：搜索【家教需求】 -->
+        <form th:action="@{/demand/list}" method="get" style="margin:0;padding:0;display:inline;">
+            <input type="hidden" name="keyword" id="demandKeyword">
+            <button type="submit" onclick="document.getElementById('demandKeyword').value=document.getElementById('searchKeyword').value"
+                    style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                搜索家教需求
+            </button>
+        </form>
+
+        <!-- 按钮2：搜索【家教简历】 -->
+        <form th:action="@{/resume/list}" method="get" style="margin:0;padding:0;display:inline;">
+            <input type="hidden" name="keyword" id="resumeKeyword">
+            <button type="submit" onclick="document.getElementById('resumeKeyword').value=document.getElementById('searchKeyword').value"
+                    style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                搜索家教简历
+            </button>
+        </form>
+    </div>
+
+    <!-- 功能按钮 -->
+    <div class="row mb-4" sec:authorize="isAuthenticated()">
+        <div class="col-md-12 text-center">
+            <a sec:authorize="hasRole('PARENT')" href="/demand/publish" class="btn btn-success me-2">发布家教需求</a>
+            <a sec:authorize="hasRole('TUTOR')" href="/resume/publish" class="btn btn-info">发布家教简历</a>
+        </div>
+    </div>
+
+    <!-- 最新家教需求 -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h3 class="mb-3">最新家教需求</h3>
+            <div th:if="${#lists.isEmpty(latestDemands)}" class="alert alert-info">
+                暂无家教需求信息
+            </div>
+            <div th:each="demand : ${latestDemands}" class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <span class="badge bg-primary" th:text="${demand.subject}"></span>
+                        <span th:text="${demand.grade}"></span>
+                    </h5>
+                    <p class="card-text" th:text="${#strings.abbreviate(demand.description, 50)}"></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">薪资：<strong th:text="${demand.salary} + '元/小时'"></strong></span>
+                        <a th:href="@{/demand/detail/{demandId}(demandId=${demand.demandId})}" class="btn btn-sm btn-outline-primary">查看详情</a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>发布时间：<span th:text="${#temporals.format(demand.publishTime, 'yyyy-MM-dd HH:mm')}"></span></small>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="/demands" class="btn btn-primary">查看更多需求</a>
+            </div>
+        </div>
+
+        <!-- 最新家教简历 -->
+        <div class="col-md-6">
+            <h3 class="mb-3">最新家教简历</h3>
+            <div th:if="${#lists.isEmpty(latestResumes)}" class="alert alert-info">
+                暂无家教简历信息
+            </div>
+            <div th:each="resume : ${latestResumes}" class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <span class="badge bg-info" th:each="subject : ${resume.getSubjectArray()}" th:text="${subject}" style="margin-right: 5px;"></span>
+                    </h5>
+                    <p class="card-text" th:text="${#strings.abbreviate(resume.experience, 50)}"></p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-muted">期望薪资：<strong th:text="${resume.expectedSalary} + '元/小时'"></strong></span>
+                        <a th:href="@{/resume/detail/{resumeId}(resumeId=${resume.resumeId})}" class="btn btn-sm btn-outline-info">查看详情</a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>发布时间：<span th:text="${#temporals.format(resume.publishTime, 'yyyy-MM-dd HH:mm')}"></span></small>
+                </div>
+            </div>
+            <div class="text-center">
+                <a href="/resumes" class="btn btn-info">查看更多简历</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 页脚 -->
+<footer class="bg-light text-center py-4 mt-5">
+    <div class="container">
+        <p class="mb-0">&copy; 2025 家教直通车系统. 版权所有.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

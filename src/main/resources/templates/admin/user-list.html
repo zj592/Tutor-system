@@ -1,0 +1,319 @@
+<!--/*@thymesVar id="successMsg" type="java.lang.String"*/-->
+<!--/*@thymesVar id="errorMsg" type="java.lang.String"*/-->
+<!--/*@thymesVar id="userPage" type="com.baomidou.mybatisplus.core.metadata.IPage"*/-->
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>用户管理</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <style>
+        /* 全局基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 10px;
+        }
+
+        /* 导航栏样式 */
+        nav {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px #f0f0f0;
+            margin: 1rem 0 2rem 0 !important;
+        }
+
+        nav a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            margin: 0 5px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        nav .navbar-brand {
+            color: #007bff;
+            font-weight: 600;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+
+        nav a:hover {
+            background-color: #007bff;
+            color: white;
+        }
+
+        nav a:last-child {
+            color: #dc3545;
+        }
+
+        nav a:last-child:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* 提示框样式（成功/错误） */
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: none;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        /* 卡片样式 */
+        .card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 5px #f0f0f0;
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: #007bff;
+            font-size: 18px;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        /* 表格样式 */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .table thead {
+            background-color: #f8f9fa;
+        }
+
+        .table th, .table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .table th {
+            color: #666;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* 状态标签样式 */
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .bg-success {
+            background-color: #198754;
+            color: white;
+        }
+
+        .bg-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .btn-sm {
+            padding: 4px 8px;
+        }
+
+        .btn-outline-secondary {
+            border-color: #6c757d;
+            color: #6c757d;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #6c757d;
+            color: white;
+            border-color: #6c757d;
+        }
+
+        /* 分页样式 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            margin-top: 1rem;
+            padding: 0;
+        }
+
+        .pagination .page-item {
+            margin: 0 3px;
+        }
+
+        .pagination .page-link {
+            padding: 8px 15px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            color: #007bff;
+            text-decoration: none;
+            background: white;
+            transition: all 0.3s;
+        }
+
+        .pagination .page-link:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination .active .page-link {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .pagination .disabled .page-link {
+            color: #666;
+            cursor: not-allowed;
+            background: #f8f9fa;
+        }
+
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 13px;
+            border-top: 1px solid #e0e0e0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <nav style="margin: 1rem 0;">
+        <a href="/" class="navbar-brand">家教直通车</a> |
+        <a th:href="@{/admin/dashboard}">首页</a> |
+        <a th:href="@{/admin/users}">用户管理</a> |
+        <a th:href="@{/admin/demands/review}">需求审核</a> |
+        <a th:href="@{/admin/resumes/review}">简历审核</a> |
+        <a th:href="@{/logout}">退出</a>
+    </nav>
+
+    <!-- 成功/错误提示 -->
+    <div th:if="${successMsg}" class="alert alert-success" th:text="${successMsg}"></div>
+    <div th:if="${errorMsg}" class="alert alert-danger" th:text="${errorMsg}"></div>
+
+    <div class="card">
+        <h2>用户列表</h2>
+        <table class="table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>用户名</th>
+                <th>邮箱</th>
+                <th>电话</th>
+                <th>角色</th>
+                <th>状态</th>
+                <th>操作</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${userPage.records.isEmpty()}">
+                <td colspan="7" align="center">暂无用户数据</td>
+            </tr>
+            <tr th:each="user : ${userPage.records}">
+                <td th:text="${user.userId}"></td>
+                <td th:text="${user.username}"></td>
+                <td th:text="${user.email}"></td>
+                <td th:text="${user.phone}"></td>
+                <td>
+                        <span th:switch="${user.role}">
+                            <span th:case="0">家长</span>
+                            <span th:case="1">教员</span>
+                            <span th:case="2">管理员</span>
+                        </span>
+                </td>
+                <td>
+                        <span th:classappend="${user.status == 1 ? 'badge bg-success' : 'badge bg-danger'}"
+                              th:text="${user.status == 1 ? '正常' : '禁用'}">
+                        </span>
+                </td>
+                <td>
+                    <form th:action="@{/admin/users/toggle/{id}(id=${user.userId})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary"
+                                th:text="${user.status == 1 ? '禁用' : '启用'}">
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <!-- 分页（简单版） -->
+
+        <nav th:if="${userPage.pages > 1}" aria-label="分页">
+            <ul class="pagination">
+                <li class="page-item" th:classappend="${userPage.current == 1 ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/users(page=${userPage.current - 1})}">上一页</a>
+                </li>
+                <li class="page-item" th:each="i : ${#numbers.sequence(1, userPage.pages)}"
+                    th:classappend="${i == userPage.current ? 'active' : ''}">
+                    <a class="page-link" th:href="@{/admin/users(page=${i})}" th:text="${i}"></a>
+                </li>
+                <li class="page-item" th:classappend="${userPage.current == userPage.pages ? 'disabled' : ''}">
+                    <a class="page-link" th:href="@{/admin/users(page=${userPage.current + 1})}">下一页</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 家教直通车系统. 版权所有.</p>
+    </footer>
+</div>
+</body>
+</html>

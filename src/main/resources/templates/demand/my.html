@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我发布的家教需求 - 家教直通车</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">家教直通车</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">首页</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/demands">家教需求</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/resumes">教员简历</a></li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <span sec:authentication="name"></span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/user/center">个人中心</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout">退出登录</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">我发布的家教需求</h5>
+                <a href="/demand/publish" class="btn btn-sm btn-success">发布新需求</a>
+            </div>
+            <div class="card-body">
+                <div th:if="${errorMsg}" class="alert alert-danger">
+                    <span th:text="${errorMsg}"></span>
+                </div>
+
+                <div th:if="${demandPage == null || #lists.isEmpty(demandPage.records)}"
+                     class="text-center text-muted py-4">
+                    您还没有发布家教需求
+                </div>
+
+                <div th:each="demand : ${demandPage.records}" class="card mb-3">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="card-title">
+                                    <span class="badge bg-primary" th:text="${demand.subject}"></span>
+                                    <span th:text="${demand.grade}"></span>
+                                </h6>
+                                <p class="card-text" th:text="${#strings.abbreviate(demand.description, 80)}"></p>
+                                <p class="text-muted mb-1">
+                                    薪资：<span th:text="${demand.salary} + '元/小时'"></span>
+                                    ｜ 联系方式：<span th:text="${demand.contact}"></span>
+                                </p>
+                                <p class="text-muted mb-0">
+                                    发布时间：<span th:text="${demand.getFormatPublishTime()}"></span>
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                <span class="badge"
+                                      th:classappend="${demand.status == 0} ? 'bg-warning' : (${demand.status == 1} ? 'bg-success' : 'bg-secondary')"
+                                      th:text="${demand.getStatusName()}"></span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <a th:href="@{/demand/detail/{id}(id=${demand.demandId})}"
+                               class="btn btn-sm btn-outline-primary">查看</a>
+                            <a th:if="${demand.status == 0}" th:href="@{/demand/edit/{id}(id=${demand.demandId})}"
+                               class="btn btn-sm btn-outline-warning">编辑</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <nav th:if="${demandPage != null && demandPage.pages > 1}">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item" th:classappend="${demandPage.current <= 1} ? 'disabled'">
+                            <a class="page-link" th:href="@{/demand/my(page=${demandPage.current - 1})}">上一页</a>
+                        </li>
+                        <li class="page-item" th:each="i : ${#numbers.sequence(1, demandPage.pages)}"
+                            th:classappend="${i == demandPage.current} ? 'active'">
+                            <a class="page-link" th:href="@{/demand/my(page=${i})}" th:text="${i}"></a>
+                        </li>
+                        <li class="page-item" th:classappend="${demandPage.current >= demandPage.pages} ? 'disabled'">
+                            <a class="page-link" th:href="@{/demand/my(page=${demandPage.current + 1})}">下一页</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-light text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2025 家教直通车系统. 版权所有.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

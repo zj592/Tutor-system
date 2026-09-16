@@ -1,0 +1,71 @@
+# 家教直通车 - 一键启动
+#   docker compose up -d --build   启动（首次会构建镜像并拉取 MySQL）
+#   docker compose logs -f app     查看后端日志
+#   docker compose down            停止（保留数据库数据）
+#   docker compose down -v         停止并清空数据库，下次启动会重新执行 init.sql
+name: tutor-system
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: tutor-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      MYSQL_DATABASE: tutor_system
+      # 单独建应用账号：官方镜像默认的 root 只允许 localhost 登录，跨容器连接会被拒
+      MYSQL_USER: ${DB_USERNAME:-tf_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-tf_pass_2026}
+      TZ: Asia/Shanghai
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-time-zone=+08:00
+    ports:
+      # 本机 3306 已有 MySQL，3307 被另一个项目占用，所以用 3308
+      - "${MYSQL_PORT:-3308}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      # 仅在数据卷为空（首次启动）时执行
+      - ./db/init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - tutor-net
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tutor-system:1.0.0
+    container_name: tutor-app
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        # 等 MySQL 真正能连上再启动应用，否则启动瞬间连库失败直接退出
+        condition: service_healthy
+    environment:
+      SERVER_PORT: 8080
+      # 容器之间不能用 localhost，这里必须换成服务名 mysql
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/tutor_system?useUnicode=true&characterEncoding=utf-8&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai
+      DB_USERNAME: ${DB_USERNAME:-tf_app}
+      DB_PASSWORD: ${DB_PASSWORD:-tf_pass_2026}
+      # application.yml 里开了 StdOutImpl，控制台会被 SQL 刷屏，这里用系统属性关掉
+      JAVA_OPTS: "-XX:MaxRAMPercentage=75 -Duser.timezone=Asia/Shanghai -Dmybatis-plus.configuration.log-impl=org.apache.ibatis.logging.nologging.NoLoggingImpl"
+      TZ: Asia/Shanghai
+    ports:
+      # 8080 可能被其他项目占用，需要时用 APP_PORT=8080 docker compose up -d
+      - "${APP_PORT:-8081}:8080"
+    networks:
+      - tutor-net
+
+volumes:
+  mysql-data:
+
+networks:
+  tutor-net:
+    driver: bridge
